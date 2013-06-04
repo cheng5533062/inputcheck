@@ -2,10 +2,13 @@ inputcheck
 ==========
 
 common use of the html input validate
+
+<pre>
 自定义输入框检查类
   author:yuan.cheng
 	date:2013-6-3
 	version:1.0
+
 e.g
 <script>
 $(document).ready(function(e) {
@@ -34,3 +37,5 @@ function check(){
 <span id="test-err" style="display:none;"></span>
 <input type="button" value="提交" onclick="check();"/>
 </body>
+</pre>
+
