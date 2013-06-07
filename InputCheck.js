@@ -8,6 +8,7 @@ var InputCheck=function(target,config){
 		this.error=target+'-err';
 	}
 	this.target=$('#'+target);
+	if(this.target.length==0)return;
 	this.error=$('#'+this.error);
 	if(null == this.validators){
 		this.validators=new Array();
@@ -25,6 +26,7 @@ InputCheck.prototype={
 		});
 	},
 	check:function(){
+		if(this.target.length==0)return;
 		var value=$.trim(this.target.val());
 		var re=true;
 		var self=this;

@@ -9,31 +9,35 @@ inputcheck
 * date:2013-6-3
 
 ####e.g
-	<script language="javasctipt" type="text/javascript">
+	<script language="JavaScript" type="text/javascript">
 		$(document).ready(function(e) {
-		    input=new XJB.InputCheck('test',{
-				error:'test-err',//显示错误信息的容器id，默认为target+'-err',此处可不设置
-				trigger:'blur',//触发事件（默认）
-				required:true,//是否必填（默认）
-				blankmsg:'不能为空！',//为空时的提示信息（默认）
+			$(':text').InputCheck({
 				defaultTemplate:'<b>{msg}</b>',//错误信息显示模板，{msg}会被替换为错误提示消息
 				validators:[{//检查器组，可以定义多个检查器
-					validator:function(v){//定义检查规则，参数为输入框的值
+					validator:function(v,e){//定义检查规则，参数为输入框的值
 						return v>10;
 					},
 					msg:'请输入大于10的数字'//错误提示信息
+				},
+				{
+					validator:'phone',
+					msg:'请输入正确电话号码'
 				}]
 			});
 		});
 		function check(){
-			alert(input.check());//也可外部调用
+			alert($(':text').check());//也可外部调用
 		}
 	</script>
-		</head>
+	</head>
 	
 	<body>
 		<input id="test" type="text" />
-		<span id="test-err" style="display:none;"></span>
+		<input id="test1" type="text" />
+		<input id="test2" type="text" /><br />
+		<span id="test-err" style="display:none; background-color:#F00"></span><br />
+		<span id="test1-err" style="display:none; background-color:#0F0"></span><br />
+		<span id="test2-err" style="display:none; background-color:#00F"></span><br />
 		<input type="button" value="提交" onclick="check();"/>
 	</body>
 
