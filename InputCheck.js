@@ -1,5 +1,6 @@
 (function(window){
 var InputCheck=function(target,config){
+	if($('#'+target).length==0 || !$('#'+target).is('input'))return;
 	this.trigger='blur';
 	this.required=true;
 	this.blankmsg='不能为空！';
@@ -7,9 +8,16 @@ var InputCheck=function(target,config){
 	if(null==this.error){
 		this.error=target+'-err';
 	}
+	if(null == this.pass){
+		this.pass=target+'-pass';
+	}
+	if(null ==this.loading){
+		this.loading=target+'-loading';
+	}
 	this.target=$('#'+target);
-	if(this.target.length==0)return;
 	this.error=$('#'+this.error);
+	this.pass=$('#'+this.pass);
+	this.loading=$('#'+this.loading);
 	if(null == this.validators){
 		this.validators=new Array();
 	}
@@ -26,28 +34,54 @@ InputCheck.prototype={
 		});
 	},
 	check:function(){
-		if(this.target.length==0)return;
+		if(this.target.length==0 || !this.target.is('input'))return true;
 		var value=$.trim(this.target.val());
 		var re=true;
 		var self=this;
+		var ajaxValidator=null;
 		$.each(this.validators,function(i,v){
-			if(($.isFunction(v.validator) && !v.validator(value,self))||
-			($.isFunction(window.$inputcheck.utils._validators[v.validator]) && !window.$inputcheck.utils._validators[v.validator](value))){
+			if('ajax'==v.type && null!=v.url){
+				ajaxValidator=v;
+			}else if(($.isFunction(v.validator) && !v.validator(value,self))||
+			($.isFunction(window.$inputcheck.utils._validators[v.validator]) && 
+			!window.$inputcheck.utils._validators[v.validator](value))){
 				self.showMSG(v.msg,v.template);
 				re=false;
 				return false;
 			}
 		});
-		if(re){
-			this.hideMSG();
+		if(re && null!=ajaxValidator){
+			this.showLoading();
+			var parameters={};
+				parameters[ajaxValidator.parameterName]=value;
+				$.getJson(ajaxValidator.url,parameters,function(data){
+					if($.isFunction(ajaxValidator.validator)){
+						if(!ajaxValidator.validator(data)){
+							self.showMSG(ajaxValidator.msg,ajaxValidator.template);
+						}else{
+							self.showPass();
+						}
+					}
+				});
+		}else if(re){
+			this.showPass();
 		}
 		return re;
 	},
 	showMSG:function(m, t){
+		this.pass.hide();
+		this.loading.hide();
 		this.error.html(this.message(m,t)).show();
 	},
-	hideMSG:function(){
+	showPass:function(){
 		this.error.hide();
+		this.loading.hide();
+		this.pass.show();
+	},
+	showLoading:function(){
+		this.error.hide();
+		this.pass.hide();
+		this.loading.show();
 	},
 	message:function(m, t){
 		if(null == m){
