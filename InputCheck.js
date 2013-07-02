@@ -4,20 +4,18 @@ var InputCheck=function(target,config){
 	this.trigger='blur';
 	this.required=true;
 	this.blankmsg='不能为空！';
+	this.error=target+'-err';
+	this.pass=target+'-pass';
+	this.loading=target+'-loading';
+	this.errorIcon=target+'err-icon';
+	this.passIcon=target+'pass-icon';
 	$.extend(this,config);
-	if(null==this.error){
-		this.error=target+'-err';
-	}
-	if(null == this.pass){
-		this.pass=target+'-pass';
-	}
-	if(null ==this.loading){
-		this.loading=target+'-loading';
-	}
 	this.target=$('#'+target);
 	this.error=$('#'+this.error);
 	this.pass=$('#'+this.pass);
 	this.loading=$('#'+this.loading);
+	this.errorIcon=$('#'+this.errorIcon);
+	this.passIcon=$('#'+this.passIcon);
 	if(null == this.validators){
 		this.validators=new Array();
 	}
@@ -42,7 +40,7 @@ InputCheck.prototype={
 		$.each(this.validators,function(i,v){
 			if('ajax'==v.type && null!=v.url){
 				ajaxValidator=v;
-			}else if(($.isFunction(v.validator) && !v.validator(value,self))||
+			}else if(($.isFunction(v.validator) && !v.validator(value,self.target))||
 			($.isFunction(window.$inputcheck.utils._validators[v.validator]) && 
 			!window.$inputcheck.utils._validators[v.validator](value))){
 				self.showMSG(v.msg,v.template);
@@ -70,17 +68,23 @@ InputCheck.prototype={
 	},
 	showMSG:function(m, t){
 		this.pass.hide();
+		this.passIcon.hide();
 		this.loading.hide();
 		this.error.html(this.message(m,t)).show();
+		this.errorIcon.show();
 	},
 	showPass:function(){
 		this.error.hide();
+		this.errorIcon.hide();
 		this.loading.hide();
 		this.pass.show();
+		this.passIcon.show();
 	},
 	showLoading:function(){
 		this.error.hide();
+		this.errorIcon.hide();
 		this.pass.hide();
+		this.passIcon.hide();
 		this.loading.show();
 	},
 	message:function(m, t){
