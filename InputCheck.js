@@ -24,7 +24,6 @@ var InputCheck=function(target,config){
 		this.validators.splice(0,0,{validator:'blank',msg:this.blankmsg,template:this.defaultTemplate});
 	}
 	this.bindEvent();
-	this.iniEventStack();
 };
 InputCheck.prototype={
 	bindEvent:function(){
@@ -35,39 +34,65 @@ InputCheck.prototype={
 	},
 	check:function(){
 		if(this.target.length==0 || !this.target.is('input'))return true;
-		this.fireEvent('before');
+		if($.isFunction(this.beforeValidate)){
+			this.beforeValidate();
+		}
 		var value=$.trim(this.target.val());
 		var re=true;
 		var self=this;
-		var ajaxValidator=null;
+		var ajaxValidators=new Array();
 		$.each(this.validators,function(i,v){
+			if($.isFunction(v.beforeValidate)){
+				v.beforeValidate.call(self);
+			}
 			if('ajax'==v.type && null!=v.url){
-				ajaxValidator=v;
+				ajaxValidators.push(v);
 			}else if(($.isFunction(v.validator) && !v.validator(value,self.target))||
 			($.isFunction(window.$inputcheck.utils._validators[v.validator]) && 
 			!window.$inputcheck.utils._validators[v.validator](value))){
 				self.showMSG(v.msg,v.template);
 				re=false;
+				if($.isFunction(v.afterValidate)){
+					v.afterValidate.call(self,re);
+				}
 				return false;
 			}
+			if('ajax'!=v.type && $.isFunction(v.afterValidate)){
+				v.afterValidate.call(self,re);
+			}
 		});
-		if(re && null!=ajaxValidator){
-			this.showLoading();
-			var parameters={};
+		if(re && ajaxValidators.length>0){
+			var index=0;
+			function exeValidate(ajaxValidators){
+				ajaxValidator=ajaxValidators[index];
+				index++;
+				self.showLoading();
+				var parameters={};
 				parameters[ajaxValidator.parameterName]=value;
-				$.getJson(ajaxValidator.url,parameters,function(data){
+				$.getJSON(ajaxValidator.url,parameters,function(data){
 					if($.isFunction(ajaxValidator.validator)){
-						if(!ajaxValidator.validator(data)){
+						var re=ajaxValidator.validator(data);
+						if($.isFunction(ajaxValidator.afterValidate)){
+							ajaxValidator.afterValidate.call(self,re);
+						}
+						if(!re){
 							self.showMSG(ajaxValidator.msg,ajaxValidator.template);
 						}else{
 							self.showPass();
+							if(index < ajaxValidators.length){
+								exeValidate(ajaxValidators);
+							}
 						}
 					}
 				});
+			}
+			exeValidate(ajaxValidators);
 		}else if(re){
 			this.showPass();
 		}
-		this.fireEvent('after',re);
+		if($.isFunction(this.afterValidate)){
+			this.afterValidate(re);
+		}
 		return re;
 	},
 	showMSG:function(m, t){
@@ -102,42 +127,6 @@ InputCheck.prototype={
 		}else{
 			return m;
 		}
-	},
-	iniEventStack:function(){
-		this.afterEventStack=new Array();
-		this.beforeEventStack=new Array();
-		var self=this;
-		if($.isFunction(this.afterValidate)){
-			this.afterEventStack.push(this.afterValidate);
-		}
-		$.each(this.validators,function(i,v){
-			if($.isFunction(v.afterValidate)){
-				self.afterEventStack.push(v.afterValidate);
-			}
-		});
-		if($.isFunction(this.beforeValidate)){
-			this.beforeEventStack.push(this.afterValidate);
-		}
-		$.each(this.validators,function(i,v){
-			if($.isFunction(v.beforeValidate)){
-				self.beforeEventStack.push(v.afterValidate);
-			}
-		});
-	},
-	fireEvent:function(type,result){
-		var evnetStack=null;
-		switch(type){
-			case 'after':
-			evnetStack=this.afterEventStack;
-			break;
-			case 'before':
-			evnetStack=this.beforeEventStack;
-			break;
-		}
-		var self=this;
-		$.each(evnetStack,function(i,v){
-			v.call(self,result,self.target,self);
-		});
 	}
 };
 var utils={

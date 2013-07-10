@@ -20,7 +20,11 @@ $(document).ready(function(e) {
 			validator:'phone',//可以使用内置检查器。其他内置检查器还有email,mobile,url,number等
 			msg:'请输入正确电话号码',
 			afterValidate:function(re){
-				this.error.css('background-color','black');
+				if(!re){
+					this.error.addClass('greyfont');
+				}else{
+					this.error.removeClass('greyfont');
+				}
 			}
 		},
 		{
@@ -33,7 +37,11 @@ $(document).ready(function(e) {
 			msg:'用户名重复'
 		}],
 		afterValidate:function(re){
-			this.error.css('background-color','#CCC');
+			if(!re){
+				this.error.addClass('redborder');
+			}else{
+				this.error.removeClass('redborder');
+			}
 		}
 	});
 });
@@ -41,6 +49,11 @@ function check(){
 	alert($(':text').check());//也可外部调用
 }
 </script>
+<style>
+.blackbackground {background-color:black;}
+.greyfont {color:#CCC}
+.redborder {border:1px solid #F00;}
+</style>
 </head>
 <body>
 <input id="test" type="text" />
@@ -49,6 +62,9 @@ function check(){
 <span id="test-err" style="display:none; background-color:#F00"></span><br />
 <span id="test1-err" style="display:none; background-color:#0F0"></span><br />
 <span id="test2-err" style="display:none; background-color:#00F"></span><br />
+<span id="test-loading" style="display:none; background-color:#F00">载入中……</span><br />
+<span id="test1-loading" style="display:none; background-color:#0F0">载入中……</span><br />
+<span id="test2-loading" style="display:none; background-color:#00F">载入中……</span><br />
 <input type="button" value="提交" onclick="check();"/>
 </body>
 </html>
