@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <title>input check demo</title>
-<script language="JavaScript" src="jquery-1.7.1.min.js" type="text/javascript"></script>
+<script src="http://libs.baidu.com/jquery/1.7.2/jquery.min.js"></script>
 <script language="JavaScript" src="InputCheck.js" type="text/javascript"></script>
 <script language="JavaScript" type="text/javascript">
 $(document).ready(function(e) {
@@ -18,7 +18,10 @@ $(document).ready(function(e) {
 		},
 		{
 			validator:'phone',//可以使用内置检查器。其他内置检查器还有email,mobile,url,number等
-			msg:'请输入正确电话号码'
+			msg:'请输入正确电话号码',
+			afterValidate:function(re){
+				this.error.css('background-color','black');
+			}
 		},
 		{
 			type:'ajax',//支持ajax异步验证
@@ -28,7 +31,10 @@ $(document).ready(function(e) {
 				return v.result=='true';
 			},
 			msg:'用户名重复'
-		}]
+		}],
+		afterValidate:function(re){
+			this.error.css('background-color','#CCC');
+		}
 	});
 });
 function check(){

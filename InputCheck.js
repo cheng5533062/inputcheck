@@ -106,12 +106,13 @@ InputCheck.prototype={
 	iniEventStack:function(){
 		this.afterEventStack=new Array();
 		this.beforeEventStack=new Array();
+		var self=this;
 		if($.isFunction(this.afterValidate)){
 			this.afterEventStack.push(this.afterValidate);
 		}
 		$.each(this.validators,function(i,v){
 			if($.isFunction(v.afterValidate)){
-				this.afterEventStack.push(v.afterValidate);
+				self.afterEventStack.push(v.afterValidate);
 			}
 		});
 		if($.isFunction(this.beforeValidate)){
@@ -119,7 +120,7 @@ InputCheck.prototype={
 		}
 		$.each(this.validators,function(i,v){
 			if($.isFunction(v.beforeValidate)){
-				this.beforeEventStack.push(v.afterValidate);
+				self.beforeEventStack.push(v.afterValidate);
 			}
 		});
 	},
